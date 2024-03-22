@@ -352,7 +352,12 @@ if {[file isfile $statefile]} {
 close $statefd
 
 ui_msg "${macports::ui_prefix} Loading Portfiles"
+set progress_total [llength $all_reg_entries]
+set progress_cur 0
 foreach ent $all_reg_entries {
+    puts -nonewline "\r${progress_cur}/${progress_total}"
+    flush stdout
+    incr progress_cur
     set entryname [$ent name]
     set requested_variants [$ent requested_variants]
     if {$requested_variants == 0} {
@@ -369,14 +374,22 @@ foreach ent $all_reg_entries {
         }
     }
 }
+puts "\r${progress_cur}/${progress_total}"
 
 # Record dependencies for all installed ports
 # (not all recursive deps are necessarily installed)
+ui_msg "${macports::ui_prefix} Getting port dependencies"
+set progress_total [llength $all_reg_entries]
+set progress_cur 0
 dict for {portname rvdict} $mports {
     dict for {rv mport} $rvdict {
+        puts -nonewline "\r${progress_cur}/${progress_total}"
+        flush stdout
+        incr progress_cur
         add_port_deps $portname $rv
     }
 }
+puts "\r${progress_cur}/${progress_total}"
 
 ui_msg "${macports::ui_prefix} Sorting ports into dependency order"
 set install_order_seen [dict create]
